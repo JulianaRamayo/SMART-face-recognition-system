@@ -1,8 +1,7 @@
-#Fixed the error where double click was needed to use the buttons.
+#Take Photo button works and it saves the image in a folder as evidence
 import streamlit as st
 import pandas as pd
 import time
-import cv2
 import numpy as np
 from datetime import datetime
 import os
@@ -16,20 +15,17 @@ def verify_credentials(username, password):
     return username == "admin" and password == "password123"
 
 # Function to save the captured image
-def save_image(image, name):
+def save_image(image_data, name):
     os.makedirs("Attendance/Photos", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"Attendance/Photos/{name}_{timestamp}.jpg"
-    cv2.imwrite(filename, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+    image = Image.open(image_data)
+    image.save(filename)
     return filename
 
 # Initialize session state variables
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
-if 'camera_on' not in st.session_state:
-    st.session_state.camera_on = False
-if 'captured_image' not in st.session_state:
-    st.session_state.captured_image = None
 
 # Login Form
 if not st.session_state.authenticated:
@@ -42,7 +38,7 @@ if not st.session_state.authenticated:
         if verify_credentials(username, password):
             st.session_state.authenticated = True
             st.success("Login successful!")
-            st.rerun()  # Add this line to re-run the script
+            st.rerun()  # Re-run the script to update the interface
         else:
             st.error("Invalid username or password.")
 
@@ -66,53 +62,23 @@ if st.session_state.authenticated:
     with col1:
         st.header("📷 Take Attendance")
         
-        # Camera controls
-        start_camera = st.button("Start Camera")
-        stop_camera = st.button("Stop Camera")
+        # Use st.camera_input to capture a photo
+        img_file_buffer = st.camera_input("Take a picture")
         
-        # Update camera state based on button clicks
-        if start_camera:
-            st.session_state.camera_on = True
-        if stop_camera:
-            st.session_state.camera_on = False
-            st.session_state.captured_image = None
-        
-        # Display camera feed if camera is on
-        if st.session_state.camera_on:
-            camera_placeholder = st.empty()
-            try:
-                camera = cv2.VideoCapture(0)
-                
-                if not camera.isOpened():
-                    st.error("Failed to open camera.")
-                else:
-                    frame_placeholder = camera_placeholder.empty()
-                    take_photo = st.button("Take Photo")
-                    
-                    while st.session_state.camera_on:
-                        ret, frame = camera.read()
-                        if ret:
-                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                            frame_placeholder.image(frame_rgb, channels="RGB")
-                            
-                            if take_photo:
-                                st.session_state.captured_image = frame_rgb.copy()
-                                saved_file = save_image(st.session_state.captured_image, "attendance")
-                                st.success(f"Photo captured and saved as {saved_file}")
-                                break
-                        else:
-                            st.error("Failed to capture frame from camera.")
-                            break
-                    
-                    camera.release()
+        if img_file_buffer is not None:
+            # To read image file buffer as a PIL Image:
+            image = Image.open(img_file_buffer)
+            # Optionally, convert the image to OpenCV format:
+            # image = np.array(image)
+            # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             
-            except Exception as e:
-                st.error(f"Error accessing camera: {str(e)}")
-        
-        # Display captured image
-        if st.session_state.captured_image is not None:
+            # Save the image
+            saved_file = save_image(img_file_buffer, "attendance")
+            st.success(f"Photo captured and saved as {saved_file}")
+            
+            # Display the captured image
             st.subheader("Captured Photo:")
-            st.image(st.session_state.captured_image, channels="RGB")
+            st.image(image, caption='Captured Image', use_column_width=True)
     
     # Attendance Data Section
     with col2:
@@ -132,7 +98,4 @@ if st.session_state.authenticated:
     # Logout button
     if st.sidebar.button("Logout"):
         st.session_state.authenticated = False
-        st.session_state.camera_on = False
-        st.session_state.captured_image = None
         st.rerun()  # Re-run the script to update the interface
-
