@@ -1,4 +1,6 @@
 import cv2
+import os
+
 def detect_frontal_faces(frame, face_cascade):
     """
     Detects frontal faces in a given frame.
