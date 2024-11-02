@@ -28,6 +28,7 @@ def detect_faces(gray_frame):
         faces.append((x, y, w, h, 'profile_right'))
     return faces
 
+
 faces_data = []  # List to hold face images
 labels = []      # List to hold labels (names converted to IDs)
 i = 0
@@ -75,3 +76,32 @@ while True:
 
 video.release()
 cv2.destroyAllWindows()
+
+
+# Initialize existing_faces and existing_labels
+existing_faces = []
+existing_labels = []
+
+# Check if data files exist and load existing data
+if 'faces_data.pkl' in os.listdir('data/'):
+    with open('data/faces_data.pkl', 'rb') as f:
+        existing_faces = pickle.load(f)
+    with open('data/labels.pkl', 'rb') as f:
+        existing_labels = pickle.load(f)
+
+# Combine existing data with new data
+all_faces = existing_faces + faces_data
+all_labels = existing_labels + labels
+
+# Save the combined data
+with open('data/faces_data.pkl', 'wb') as f:
+    pickle.dump(all_faces, f)
+with open('data/labels.pkl', 'wb') as f:
+    pickle.dump(all_labels, f)
+
+# Save or update the label IDs
+with open('data/label_ids.pkl', 'wb') as f:
+    pickle.dump(label_ids, f)
+
+print(f"Data saved. Total samples: {len(all_faces)}")
+
