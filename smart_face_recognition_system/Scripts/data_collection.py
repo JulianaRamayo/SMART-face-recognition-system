@@ -105,3 +105,13 @@ with open('data/label_ids.pkl', 'wb') as f:
 
 print(f"Data saved. Total samples: {len(all_faces)}")
 
+
+# Initialize the LBPH face recognizer
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+recognizer.train(all_faces, np.array(all_labels))
+
+# Save the trained model
+recognizer.save('data/face_recognizer.yml')
+print("Model trained and saved successfully.")
+
+
