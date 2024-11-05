@@ -86,7 +86,7 @@ SMART-face-recognition-system/
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
-├── components/ui          # UI components for the frontend
+├── components/ui          # Reusable UI components
 │   ├── button.tsx
 │   ├── calendar.tsx
 │   ├── card.tsx
@@ -105,7 +105,9 @@ SMART-face-recognition-system/
 │   └── vercel.svg
 ├── .gitattributes
 ├── .gitignore
+├── Procfile
 ├── README.md              # Project documentation
+├── app.py                 # Flask application file
 ├── components.json
 ├── next-env.d.ts
 ├── next.config.js         # Next.js configuration
